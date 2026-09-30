@@ -1,0 +1,11 @@
+numpy
+python-dotenv
+pymupdf4llm
+huggingface-hub
+sentence-transformers
+langchain-text-splitters
+langchain-huggingface
+langchain-chroma
+langchain-core
+langchain-community
+llama-cpp-python

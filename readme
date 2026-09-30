@@ -1,0 +1,5 @@
+used PYmuPDF loader bcoz Better/faster PDF extraction than pypdfloader
+PyMuPDFLoader has already extracted the text from the PDF so we dont need seperate text splitter
+then loaded the pdf
+
+what is the mechanism action of Cenobamate
