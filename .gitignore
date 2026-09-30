@@ -13,5 +13,3 @@ venv/
 chroma_db/
 chroma_test_db/
 
-# PDF files
-*.pdf
