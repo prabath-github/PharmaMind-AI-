@@ -1,0 +1,209 @@
+# PharmaMind AI 💊
+
+### AI-Powered Pharmaceutical Knowledge Assistant using RAG
+
+PharmaMind AI is an AI-powered pharmaceutical knowledge assistant that enables users to ask questions about pharmaceutical reference books and retrieve relevant information using Retrieval-Augmented Generation (RAG).
+
+The application combines semantic search, Maximum Marginal Relevance (MMR), cross-encoder reranking and a locally hosted Qwen3 language model to retrieve relevant information and generate context-based answers. It also provides a Streamlit interface for interacting with the assistant.
+
+## 🚀 Features
+
+* PDF Processing: Converts pharmaceutical PDF documents into Markdown using PyMuPDF4LLM.
+* Intelligent Chunking: Uses Markdown header splitting and recursive character splitting to organize document content.
+* Semantic Search: Uses Sentence Transformers to generate embeddings and retrieve relevant information.
+* Vector Database: Stores document embeddings in ChromaDB for persistent retrieval.
+* MMR Retrieval: Retrieves diverse and relevant document chunks to reduce redundancy.
+* Similarity Filtering: Filters retrieved chunks using cosine similarity.
+* Cross-Encoder Reranking: Reranks retrieved passages using a cross-encoder to prioritize relevant information.
+* Local LLM: Uses Qwen3-4B-Instruct (GGUF, Q4_K_M) through llama.cpp for local answer generation.
+* Interactive UI: Provides a Streamlit interface for asking questions and viewing answers.
+* Context-Based Answers: Instructs the LLM to answer using retrieved reference material and avoid inventing unsupported information.
+
+## 🛠️ Technology Stack
+
+| Component              | Technology                           |
+| ---------------------- | ------------------------------------ |
+| Programming Language   | Python                               |
+| User Interface         | Streamlit                            |
+| LLM                    | Qwen3-4B-Instruct-2507 (GGUF)        |
+| LLM Inference          | llama.cpp                            |
+| Embedding Model        | all-MiniLM-L6-v2                     |
+| Reranker               | cross-encoder/ms-marco-MiniLM-L-6-v2 |
+| Vector Database        | ChromaDB                             |
+| PDF Processing         | PyMuPDF4LLM                          |
+| Text Splitting         | LangChain                            |
+| Model Download         | Hugging Face Hub                     |
+| Environment Management | python-dotenv                        |
+
+## 🏗️ Architecture
+
+The application follows a Retrieval-Augmented Generation (RAG) pipeline.
+
+1. Document Ingestion
+
+* Load the pharmaceutical PDF.
+* Convert the PDF into Markdown.
+* Split the content using Markdown headers.
+* Apply recursive character splitting with a chunk size of 1,500 characters and an overlap of 200 characters.
+* Remove duplicate chunks.
+
+2. Embedding and Indexing
+
+* Generate embeddings using all-MiniLM-L6-v2.
+* Store the document embeddings and associated text in ChromaDB.
+* Use deterministic chunk IDs to help prevent duplicate insertion.
+
+3. Retrieval
+
+* Convert the user's question into an embedding.
+* Retrieve candidate chunks using MMR.
+* Remove duplicate candidates.
+* Apply cosine similarity filtering with a threshold of 0.40.
+* Rerank the remaining candidates using a cross-encoder.
+* Select the top five chunks for answer generation.
+
+4. Answer Generation
+
+* Pass the retrieved context and user question to the Qwen3 language model.
+* Generate an answer based on the supplied pharmaceutical reference material.
+* Instruct the model to acknowledge missing information rather than inventing unsupported details.
+
+5. User Interface
+
+* Use Streamlit to provide an interactive interface for asking questions and displaying answers.
+
+## 📂 Project Structure
+
+```text
+PharmaMind-AI/
+│
+├── app.py                 # Streamlit user interface
+├── main.py                # RAG pipeline and retrieval logic
+├── requirements.txt       # Python dependencies
+├── README.md              # Project documentation
+├── .gitignore             # Excluded files and folders
+├── .env                   # Local configuration (not uploaded)
+├── pharma_book.pdf        # Pharmaceutical reference PDF
+│
+├── chroma_db/             # Local vector database
+├── chroma_test_db/        # Test vector database
+└── .venv/                 # Python virtual environment
+```
+
+The database folders, virtual environment and .env file are intended to remain local and are excluded from version control.
+
+## ⚙️ Installation and Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/prabath-github/PharmaMind-AI-.git
+cd PharmaMind-AI-
+```
+
+### 2. Create a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+Activate it on Windows:
+
+```powershell
+.venv\Scripts\activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Note: Installing llama-cpp-python may require additional build tools on some systems.
+
+### 4. Configure the PDF path
+
+Create a .env file in the project directory:
+
+```env
+PHARMA_PDF_PATH=pharma_book.pdf
+```
+
+Place your pharmaceutical PDF in the project directory, or specify its absolute path in the .env file.
+
+### 5. Run the application
+
+Launch the Streamlit interface:
+
+```bash
+streamlit run app.py
+```
+
+Open the local URL displayed in the terminal to interact with the application.
+
+The Qwen model is downloaded from Hugging Face when required. The embedding and reranker models may also need to be downloaded on their first use.
+
+## 🧠 Models Used
+
+| Model                           | Purpose                 |
+| ------------------------------- | ----------------------- |
+| Qwen3-4B-Instruct-2507 (Q4_K_M) | Local answer generation |
+| all-MiniLM-L6-v2                | Semantic embeddings     |
+| ms-marco-MiniLM-L-6-v2          | Cross-encoder reranking |
+
+The Qwen model uses GGUF quantization to reduce memory requirements compared with full-precision model weights. Actual performance depends on the available hardware.
+
+## 🔍 Retrieval Configuration
+
+| Parameter                   |        Value |
+| --------------------------- | -----------: |
+| Chunk Size                  |        1,500 |
+| Chunk Overlap               |          200 |
+| MMR Candidates              |           30 |
+| MMR Fetch Size              |           60 |
+| MMR Lambda                  |         0.65 |
+| Cosine Similarity Threshold |         0.40 |
+| Final Retrieved Chunks      |            5 |
+| Reranker Batch Size         |           16 |
+| LLM Context Window          | 8,192 tokens |
+| Maximum Generated Tokens    |        1,024 |
+| LLM Temperature             |          0.1 |
+
+These are the current configuration values in the retrieval implementation.
+
+## 📋 Example Use Cases
+
+* Ask questions about pharmaceutical reference material.
+* Retrieve information about drug metabolism and drug interactions when covered in the supplied documents.
+* Search for information on pharmaceutical compounds and metabolic pathways.
+* Find relevant explanations in lengthy pharmaceutical reference books.
+* Generate context-based answers from retrieved document passages.
+
+## ⚠️ Limitations
+
+* Answer quality depends on the accuracy and coverage of the source documents.
+* Retrieval may miss relevant information if the question is ambiguous or the relevant content is poorly represented in the PDF.
+* Local inference speed and memory consumption depend on the hardware.
+* The application is designed for pharmaceutical reference assistance and is not a substitute for professional medical advice.
+* Generated answers should be checked against the original reference material, especially when discussing dosages, contraindications or drug interactions.
+
+## 🔮 Future Improvements
+
+* Improve retrieval accuracy for tables and complex PDF layouts.
+* Add source page references and more detailed citations to generated answers.
+* Evaluate retrieval precision and answer faithfulness using a test dataset.
+* Improve handling of questions that require information from multiple sections.
+* Optimize document ingestion and vector database updates.
+* Add support for multiple pharmaceutical reference documents.
+
+## 🔒 Privacy
+
+The language model is configured for local inference using llama.cpp. However, the application downloads models from Hugging Face when needed. Users should review their configuration and dependencies before using confidential documents.
+
+## 📄 License
+
+This project is licensed under the Apache 2.0 License. See the LICENSE file for details.
+
+---
+
+Developed as an AI-powered pharmaceutical document retrieval and question-answering project using RAG, semantic search and local LLM inference.
